@@ -1,0 +1,97 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. */
+
+@layer base {
+  :root {
+    --background: 45 85% 97%; /* #FEF8EB */
+    --foreground: 210 58% 18%; /* #0D2E4C */
+
+    --card: 45 85% 97%; /* #FEF8EB */
+    --card-foreground: 210 58% 18%; /* #0D2E4C */
+
+    --popover: 45 85% 97%; /* #FEF8EB */
+    --popover-foreground: 210 58% 18%; /* #0D2E4C */
+
+    --primary: 210 58% 18%; /* #0D2E4C */
+    --primary-foreground: 45 85% 97%; /* #FEF8EB */
+
+    --secondary: 225 61% 71%; /* #8097E3 */
+    --secondary-foreground: 210 58% 18%; /* #0D2E4C */
+
+    --muted: 225 61% 71%; /* #8097E3 with reduced opacity */
+    --muted-foreground: 210 58% 18%; /* #0D2E4C */
+
+    --accent: 225 61% 71%; /* #8097E3 */
+    --accent-foreground: 210 58% 18%; /* #0D2E4C */
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 45 85% 97%; /* #FEF8EB */
+
+    --border: 225 61% 71%; /* #8097E3 */
+    --input: 225 61% 71%; /* #8097E3 */
+    --ring: 210 58% 18%; /* #0D2E4C */
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 45 85% 97%; /* #FEF8EB */
+    --sidebar-foreground: 210 58% 18%; /* #0D2E4C */
+    --sidebar-primary: 210 58% 18%; /* #0D2E4C */
+    --sidebar-primary-foreground: 45 85% 97%; /* #FEF8EB */
+    --sidebar-accent: 225 61% 71%; /* #8097E3 */
+    --sidebar-accent-foreground: 210 58% 18%; /* #0D2E4C */
+    --sidebar-border: 225 61% 71%; /* #8097E3 */
+    --sidebar-ring: 210 58% 18%; /* #0D2E4C */
+  }
+
+  .dark {
+    --background: 210 58% 18%; /* #0D2E4C */
+    --foreground: 45 85% 97%; /* #FEF8EB */
+
+    --card: 210 58% 18%; /* #0D2E4C */
+    --card-foreground: 45 85% 97%; /* #FEF8EB */
+
+    --popover: 210 58% 18%; /* #0D2E4C */
+    --popover-foreground: 45 85% 97%; /* #FEF8EB */
+
+    --primary: 45 85% 97%; /* #FEF8EB */
+    --primary-foreground: 210 58% 18%; /* #0D2E4C */
+
+    --secondary: 225 61% 71%; /* #8097E3 */
+    --secondary-foreground: 210 58% 18%; /* #0D2E4C */
+
+    --muted: 225 61% 71%; /* #8097E3 */
+    --muted-foreground: 45 85% 97%; /* #FEF8EB */
+
+    --accent: 225 61% 71%; /* #8097E3 */
+    --accent-foreground: 210 58% 18%; /* #0D2E4C */
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 45 85% 97%; /* #FEF8EB */
+
+    --border: 225 61% 71%; /* #8097E3 */
+    --input: 225 61% 71%; /* #8097E3 */
+    --ring: 45 85% 97%; /* #FEF8EB */
+    --sidebar-background: 210 58% 18%; /* #0D2E4C */
+    --sidebar-foreground: 45 85% 97%; /* #FEF8EB */
+    --sidebar-primary: 225 61% 71%; /* #8097E3 */
+    --sidebar-primary-foreground: 210 58% 18%; /* #0D2E4C */
+    --sidebar-accent: 225 61% 71%; /* #8097E3 */
+    --sidebar-accent-foreground: 45 85% 97%; /* #FEF8EB */
+    --sidebar-border: 225 61% 71%; /* #8097E3 */
+    --sidebar-ring: 45 85% 97%; /* #FEF8EB */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
