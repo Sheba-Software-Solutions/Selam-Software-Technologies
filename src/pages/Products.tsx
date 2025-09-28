@@ -2,85 +2,135 @@ import { ExternalLink, Star, Users, Download } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const Products = () => {
-  const products = [
-    {
-      id: 1,
-      name: "ERP Solutions Suite",
-      category: "Enterprise",
-      description: "Comprehensive Enterprise Resource Planning system designed for medium to large businesses. Includes modules for accounting, inventory, HR, and project management.",
-      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=400&fit=crop",
-      features: ["Multi-module integration", "Real-time analytics", "Cloud-based", "Mobile access"],
-      price: "Custom pricing",
-      rating: 4.8,
-      users: "500+",
-      status: "Available"
-    },
-    {
-      id: 2,
-      name: "School Management System",
-      category: "Education",
-      description: "Complete school administration platform covering student enrollment, grading, attendance tracking, and parent communication.",
-      image: "https://images.unsplash.com/photo-1497486751825-1233686d5d80?w=600&h=400&fit=crop",
-      features: ["Student portal", "Grade management", "Attendance tracking", "Parent communication"],
-      price: "$299/month",
-      rating: 4.9,
-      users: "200+",
-      status: "Available"
-    },
-    {
-      id: 3,
-      name: "E-Commerce Platform",
-      category: "Retail",
-      description: "Modern e-commerce solution with advanced inventory management, payment processing, and analytics dashboard.",
-      image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=400&fit=crop",
-      features: ["Multi-vendor support", "Payment gateway", "Inventory management", "Analytics dashboard"],
-      price: "$199/month",
-      rating: 4.7,
-      users: "1000+",
-      status: "Available"
-    },
-    {
-      id: 4,
-      name: "Healthcare Management",
-      category: "Healthcare",
-      description: "Digital health platform for clinics and hospitals with patient records, appointment scheduling, and billing integration.",
-      image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=600&h=400&fit=crop",
-      features: ["Patient records", "Appointment scheduling", "Billing integration", "Prescription management"],
-      price: "$399/month",
-      rating: 4.6,
-      users: "150+",
-      status: "Available"
-    },
-    {
-      id: 5,
-      name: "Project Management Tool",
-      category: "Productivity",
-      description: "Collaborative project management platform with task tracking, team communication, and progress analytics.",
-      image: "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=600&h=400&fit=crop",
-      features: ["Task management", "Team collaboration", "Time tracking", "Progress reports"],
-      price: "$49/month",
-      rating: 4.5,
-      users: "2000+",
-      status: "Available"
-    },
-    {
-      id: 6,
-      name: "Financial Analytics AI",
-      category: "FinTech",
-      description: "AI-powered financial analysis tool that provides insights, predictions, and automated reporting for businesses.",
-      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop",
-      features: ["AI predictions", "Automated reports", "Risk analysis", "Performance metrics"],
-      price: "Coming Soon",
-      rating: 0,
-      users: "0",
-      status: "Coming Soon"
-    }
-  ];
-
+  const { productId } = useParams();
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const categories = ["All", "Enterprise", "Education", "Retail", "Healthcare", "Productivity", "FinTech"];
+
+    useEffect(() => {
+      const fetchProducts = async () => {
+        try {
+          const response = await fetch(`${API_URL}/api/v1/products`);
+          if (!response.ok) throw new Error("Failed to fetch products");
+          const data = await response.json();
+          if (Array.isArray(data)) {
+            setProducts(data);
+          } else if (Array.isArray(data.products)) {
+            setProducts(data.products);
+          } else {
+            setProducts([]);
+          }
+        } catch (err) {
+          setError(err.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchProducts();
+    }, []);
+
+  const selected = productId ? products.find(p => p.id === Number(productId)) : undefined;
+
+  if (productId && !selected) {
+    return (
+      <div className="min-h-screen bg-brand-light flex items-center justify-center p-8">
+        <div className="text-center space-y-6">
+          <h1 className="text-3xl font-bold text-brand-dark">Product Not Found</h1>
+          <p className="text-brand-dark/70 max-w-md mx-auto">We couldn't find the product you were looking for. It may have been removed or the URL is incorrect.</p>
+          <Link to="/products">
+            <Button className="bg-brand-dark hover:bg-brand-dark/90 text-brand-light">Back to Products</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (selected) {
+    return (
+      <div className="min-h-screen bg-brand-light">
+        <section className="py-6 border-b border-brand-accent/20 bg-white/60 backdrop-blur">
+          <div className="max-w-7xl mx-auto px-4 flex items-center gap-4">
+            <Link to="/products">
+              <Button variant="outline" size="sm" className="border-brand-accent text-brand-dark hover:bg-brand-accent hover:text-white">Back</Button>
+            </Link>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge className="bg-brand-accent text-white border-0">{selected.category}</Badge>
+              <h1 className="text-2xl md:text-3xl font-bold text-brand-dark">{selected.name}</h1>
+            </div>
+          </div>
+        </section>
+        <section className="py-16">
+          <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-5 gap-10">
+            <div className="lg:col-span-3">
+              <div className="overflow-hidden rounded-lg shadow-sm border border-brand-accent/20 bg-white mb-8">
+                <img src={selected.image} alt={selected.name} className="w-full h-80 object-cover" />
+              </div>
+              <Card className="p-8 bg-white border-brand-accent/20 space-y-6">
+                <div>
+                  <h2 className="text-xl font-semibold mb-2 text-brand-dark">Overview</h2>
+                  <p className="text-brand-dark/80 leading-relaxed">{selected.description}</p>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold mb-3 text-brand-dark">Key Features</h3>
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {selected.features.map(f => (
+                      <li key={f} className="text-sm bg-brand-accent/10 text-brand-dark px-3 py-2 rounded-md border border-brand-accent/20">{f}</li>
+                    ))}
+                  </ul>
+                </div>
+              </Card>
+            </div>
+            <div className="lg:col-span-2 space-y-6">
+              <Card className="p-8 bg-white border-brand-accent/20 space-y-6">
+                {selected.status === "Available" ? (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-sm text-brand-dark/70">
+                      <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                      <span className="font-medium">{selected.rating}</span>
+                      <span className="text-brand-dark/50">/ 5.0</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-brand-dark/70">
+                      <Users className="h-4 w-4" />
+                      <span>{selected.users} users</span>
+                    </div>
+                  </div>
+                ) : (
+                  <Badge variant="secondary" className="bg-brand-accent/20 text-brand-dark border-0">{selected.status}</Badge>
+                )}
+                <div className="space-y-2">
+                  <div className="text-sm uppercase tracking-wide text-brand-dark/60">Pricing</div>
+                  <div className="text-2xl font-bold text-brand-accent">{selected.price}</div>
+                </div>
+                <div className="flex flex-col gap-3">
+                  {selected.status === "Available" ? (
+                    <>
+                      <Button className="bg-brand-dark hover:bg-brand-dark/90 w-full">Request Demo</Button>
+                      <Button variant="outline" className="border-brand-accent text-brand-dark hover:bg-brand-accent hover:text-white w-full">Get Started</Button>
+                    </>
+                  ) : (
+                    <Button disabled variant="outline" className="border-brand-accent/50 text-brand-dark/50 w-full">Coming Soon</Button>
+                  )}
+                </div>
+              </Card>
+              <Card className="p-6 bg-white border-brand-accent/20">
+                <h3 className="text-lg font-semibold mb-3 text-brand-dark">Need Customization?</h3>
+                <p className="text-sm text-brand-dark/70 mb-4">We can tailor this product to your organization's specific workflows and needs. Reach out for a consultation.</p>
+                <Link to="/contact">
+                  <Button size="sm" className="bg-brand-accent hover:bg-brand-accent/90 text-white">Contact Us</Button>
+                </Link>
+              </Card>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-brand-light">
@@ -192,9 +242,11 @@ const Products = () => {
                             <ExternalLink className="h-4 w-4 mr-1" />
                             Demo
                           </Button>
-                          <Button size="sm" className="bg-brand-dark hover:bg-brand-dark/90 text-brand-light">
-                            Get Started
-                          </Button>
+                          <Link to={`/products/${product.id}`}>
+                            <Button size="sm" className="bg-brand-dark hover:bg-brand-dark/90 text-brand-light">
+                              Get Started
+                            </Button>
+                          </Link>
                         </>
                       ) : (
                         <Button size="sm" variant="outline" disabled className="border-brand-accent/50 text-brand-dark/50">

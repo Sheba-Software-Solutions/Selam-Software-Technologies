@@ -1,4 +1,6 @@
 
+import { useEffect, useState } from "react";
+const API_URL = import.meta.env.VITE_API_URL;
 import { MapPin, Clock, DollarSign, Users, Briefcase, GraduationCap } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,116 +8,32 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 
 const Jobs = () => {
-  const jobs = [
-    {
-      id: 1,
-      title: "Senior Full Stack Developer",
-      department: "Engineering",
-      location: "Addis Ababa, Ethiopia",
-      type: "Full-time",
-      salary: "$40,000 - $60,000",
-      experience: "5+ years",
-      description: "We are looking for an experienced Full Stack Developer to join our growing team. You will be responsible for developing both client and server software.",
-      requirements: [
-        "5+ years of experience in full stack development",
-        "Proficiency in React, Node.js, and TypeScript",
-        "Experience with databases (PostgreSQL, MongoDB)",
-        "Knowledge of cloud platforms (AWS, Azure)",
-        "Strong problem-solving skills"
-      ],
-      posted: "2 days ago"
-    },
-    {
-      id: 2,
-      title: "UI/UX Designer",
-      department: "Design",
-      location: "Addis Ababa, Ethiopia",
-      type: "Full-time",
-      salary: "$30,000 - $45,000",
-      experience: "3+ years",
-      description: "Join our design team to create intuitive and beautiful user interfaces for our software products and client projects.",
-      requirements: [
-        "3+ years of UI/UX design experience",
-        "Proficiency in Figma, Adobe Creative Suite",
-        "Strong portfolio showcasing design projects",
-        "Understanding of user-centered design principles",
-        "Experience with prototyping tools"
-      ],
-      posted: "1 week ago"
-    },
-    {
-      id: 3,
-      title: "DevOps Engineer",
-      department: "Infrastructure",
-      location: "Remote",
-      type: "Full-time",
-      salary: "$45,000 - $65,000",
-      experience: "4+ years",
-      description: "We need a DevOps Engineer to help us streamline our development and deployment processes while maintaining high security standards.",
-      requirements: [
-        "4+ years of DevOps experience",
-        "Experience with Docker, Kubernetes",
-        "Knowledge of CI/CD pipelines",
-        "Familiarity with AWS or Azure",
-        "Scripting skills (Python, Bash)"
-      ],
-      posted: "3 days ago"
-    },
-    {
-      id: 4,
-      title: "Mobile App Developer",
-      department: "Engineering",
-      location: "Addis Ababa, Ethiopia",
-      type: "Full-time",
-      salary: "$35,000 - $50,000",
-      experience: "3+ years",
-      description: "Develop cutting-edge mobile applications for iOS and Android platforms using React Native and native technologies.",
-      requirements: [
-        "3+ years of mobile app development",
-        "Experience with React Native or Flutter",
-        "Knowledge of native iOS/Android development",
-        "Published apps on App Store/Play Store",
-        "Understanding of mobile UI/UX best practices"
-      ],
-      posted: "5 days ago"
-    },
-    {
-      id: 5,
-      title: "Project Manager",
-      department: "Management",
-      location: "Addis Ababa, Ethiopia",
-      type: "Full-time",
-      salary: "$35,000 - $50,000",
-      experience: "4+ years",
-      description: "Lead and coordinate software development projects from conception to delivery, ensuring timely and quality outcomes.",
-      requirements: [
-        "4+ years of project management experience",
-        "PMP or Agile certification preferred",
-        "Experience with project management tools",
-        "Strong communication and leadership skills",
-        "Technical background in software development"
-      ],
-      posted: "1 week ago"
-    },
-    {
-      id: 6,
-      title: "Junior Software Developer",
-      department: "Engineering",
-      location: "Addis Ababa, Ethiopia",
-      type: "Full-time",
-      salary: "$20,000 - $30,000",
-      experience: "0-2 years",
-      description: "Great opportunity for recent graduates or junior developers to start their career in software development with mentorship and growth opportunities.",
-      requirements: [
-        "Bachelor's degree in Computer Science or related field",
-        "Basic knowledge of programming languages",
-        "Eagerness to learn and grow",
-        "Good problem-solving skills",
-        "Team player with good communication skills"
-      ],
-      posted: "2 days ago"
-    }
-  ];
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+  const response = await fetch(`${API_URL}/api/v1/jobs`);
+        if (!response.ok) throw new Error("Failed to fetch jobs");
+        const data = await response.json();
+        // If backend returns { jobs: [...] }, use data.jobs; else use data
+        if (Array.isArray(data)) {
+          setJobs(data);
+        } else if (Array.isArray(data.jobs)) {
+          setJobs(data.jobs);
+        } else {
+          setJobs([]);
+        }
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchJobs();
+  }, []);
 
   return (
     <div className="min-h-screen bg-brand-light">
@@ -179,7 +97,12 @@ const Jobs = () => {
           </div>
 
           <div className="space-y-6">
-            {jobs.map((job, index) => (
+            {loading && <div className="text-center text-brand-dark">Loading jobs...</div>}
+            {error && <div className="text-center text-red-500">{error}</div>}
+            {!loading && !error && jobs.length === 0 && (
+              <div className="text-center text-brand-dark">No jobs found.</div>
+            )}
+            {!loading && !error && jobs.map((job, index) => (
               <Card 
                 key={job.id} 
                 className="p-8 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 animate-slide-in-from-left bg-white border-brand-accent/20"
@@ -218,23 +141,20 @@ const Jobs = () => {
                     </Badge>
                   </div>
                 </div>
-                
                 <p className="text-brand-dark/80 mb-4">
                   {job.description}
                 </p>
-                
                 <div className="mb-6">
                   <h4 className="text-lg font-semibold text-brand-dark mb-2">Requirements:</h4>
                   <ul className="space-y-1">
-                    {job.requirements.map((req, idx) => (
+                    {Array.isArray(job.requirements) ? job.requirements.map((req, idx) => (
                       <li key={idx} className="text-brand-dark/70 text-sm flex items-start">
                         <span className="text-brand-accent mr-2">•</span>
                         {req}
                       </li>
-                    ))}
+                    )) : null}
                   </ul>
                 </div>
-                
                 <div className="flex gap-3">
                   <Link to={`/job-application/${job.id}`}>
                     <Button className="bg-brand-dark hover:bg-brand-dark/90 text-brand-light">

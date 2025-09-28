@@ -5,16 +5,57 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-
+import { useState } from "react";
+const API_URL = import.meta.env.VITE_API_URL;
 const Contact = () => {
   const { toast } = useToast();
+  const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    subject: "",
+    message: ""
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Message Sent!",
-      description: "Thank you for your message. We'll get back to you soon.",
-    });
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        phone: form.phone,
+        subject: form.subject,
+        message: form.message
+      };
+      const response = await fetch(`${API_URL}/api/v1/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      if (!response.ok) throw new Error("Failed to send message");
+      toast({
+        title: "Message Sent!",
+        description: "Thank you for your message. We'll get back to you soon.",
+      });
+  setForm({ firstName: "", lastName: "", email: "", phone: "", subject: "", message: "" });
+    } catch (err: any) {
+      toast({
+        title: "Failed to Send",
+        description: err.message || "An error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const contactInfo = [
@@ -68,7 +109,7 @@ const Contact = () => {
             {contactInfo.map((info, index) => (
               <Card 
                 key={info.title} 
-                className="p-6 text-center hover:shadow-lg transition-all duration-300 animate-in fade-in-50 duration-1000"
+                className="p-6 text-center hover:shadow-lg transition-all animate-in fade-in-50 duration-1000"
                 style={{ animationDelay: `${200 + index * 150}ms` }}
               >
                 <div className="flex justify-center mb-4">
@@ -106,83 +147,88 @@ const Contact = () => {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        First Name
-                      </label>
-                      <Input 
-                        type="text" 
-                        required 
+                      <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                      <Input
+                        type="text"
+                        name="firstName"
+                        required
                         className="w-full"
                         placeholder="Your first name"
+                        value={form.firstName}
+                        onChange={handleChange}
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Last Name
-                      </label>
-                      <Input 
-                        type="text" 
-                        required 
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                      <Input
+                        type="text"
+                        name="lastName"
+                        required
                         className="w-full"
                         placeholder="Your last name"
+                        value={form.lastName}
+                        onChange={handleChange}
                       />
                     </div>
                   </div>
-                  
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Email
-                    </label>
-                    <Input 
-                      type="email" 
-                      required 
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <Input
+                      type="email"
+                      name="email"
+                      required
                       className="w-full"
                       placeholder="your.email@example.com"
+                      value={form.email}
+                      onChange={handleChange}
                     />
                   </div>
-                  
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Phone Number
-                    </label>
-                    <Input 
-                      type="tel" 
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+                    <Input
+                      type="text"
+                      name="phone"
+                      required
                       className="w-full"
-                      placeholder="+251 911 123 456"
+                      placeholder="Your phone number"
+                      value={form.phone}
+                      onChange={handleChange}
                     />
                   </div>
-                  
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Subject
-                    </label>
-                    <Input 
-                      type="text" 
-                      required 
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+                    <Input
+                      type="text"
+                      name="subject"
+                      required
                       className="w-full"
                       placeholder="What's this about?"
+                      value={form.subject}
+                      onChange={handleChange}
                     />
                   </div>
-                  
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Message
-                    </label>
-                    <Textarea 
-                      required 
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Message</label>
+                    <Textarea
+                      name="message"
+                      required
                       rows={6}
                       className="w-full"
                       placeholder="Tell us more about your project..."
+                      value={form.message}
+                      onChange={handleChange}
                     />
                   </div>
-                  
-                  <Button 
-                    type="submit" 
-                    size="lg" 
+                  </div>
+                  <Button
+                    type="submit"
+                    size="lg"
                     className="w-full bg-gradient-to-r from-brand-dark to-brand-accent hover:from-brand-dark/90 hover:to-brand-accent/90"
+                    disabled={isSubmitting}
                   >
                     <Send className="mr-2 h-5 w-5" />
-                    Send Message
+                    {isSubmitting ? "Sending..." : "Send Message"}
                   </Button>
                 </form>
               </Card>

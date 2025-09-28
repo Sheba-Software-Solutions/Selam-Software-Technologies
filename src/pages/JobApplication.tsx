@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+const API_URL = import.meta.env.VITE_API_URL;
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Upload, User, Mail, Phone, FileText } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -13,6 +14,26 @@ const JobApplication = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    address: "",
+    city: "",
+    experience: "",
+    jobTitle: "",
+    company: "",
+    linkedin: "",
+    portfolio: "",
+    skills: "",
+    interest: "",
+    project: "",
+    salary: "",
+    startDate: "",
+  });
+  const [resume, setResume] = useState<File | null>(null);
+  const [coverLetter, setCoverLetter] = useState<File | null>(null);
 
   const jobTitles: { [key: string]: string } = {
     "1": "Senior Full Stack Developer",
@@ -25,19 +46,50 @@ const JobApplication = () => {
 
   const jobTitle = jobTitles[jobId || "1"] || "Unknown Position";
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, files } = e.target;
+    if (files && files[0]) {
+      if (id === "resume") setResume(files[0]);
+      if (id === "cover-letter") setCoverLetter(files[0]);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate form submission
-    setTimeout(() => {
+    try {
+      const formData = new FormData();
+      formData.append("jobId", jobId || "");
+      Object.entries(form).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
+      if (resume) formData.append("resume", resume);
+      if (coverLetter) formData.append("coverLetter", coverLetter);
+
+  const response = await fetch(`${API_URL}/api/v1/applications`, {
+        method: "POST",
+        body: formData,
+      });
+      if (!response.ok) throw new Error("Failed to submit application");
       setIsSubmitting(false);
       toast({
         title: "Application Submitted!",
         description: "Thank you for your application. We'll review it and get back to you soon.",
       });
       navigate("/jobs");
-    }, 2000);
+    } catch (err: any) {
+      setIsSubmitting(false);
+      toast({
+        title: "Submission Failed",
+        description: err.message || "An error occurred. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -78,6 +130,9 @@ const JobApplication = () => {
                   type="text" 
                   required 
                   placeholder="Enter your first name"
+                  name="firstName"
+                  value={form.firstName}
+                  onChange={handleChange}
                 />
               </div>
               
@@ -89,6 +144,9 @@ const JobApplication = () => {
                   type="text" 
                   required 
                   placeholder="Enter your last name"
+                  name="lastName"
+                  value={form.lastName}
+                  onChange={handleChange}
                 />
               </div>
               
@@ -100,6 +158,9 @@ const JobApplication = () => {
                   type="email" 
                   required 
                   placeholder="your.email@example.com"
+                  name="email"
+                  value={form.email}
+                  onChange={handleChange}
                 />
               </div>
               
@@ -111,6 +172,9 @@ const JobApplication = () => {
                   type="tel" 
                   required 
                   placeholder="+251 911 123 456"
+                  name="phone"
+                  value={form.phone}
+                  onChange={handleChange}
                 />
               </div>
               
@@ -121,6 +185,9 @@ const JobApplication = () => {
                 <Input 
                   type="text" 
                   placeholder="Your full address"
+                  name="address"
+                  value={form.address}
+                  onChange={handleChange}
                 />
               </div>
               
@@ -132,6 +199,9 @@ const JobApplication = () => {
                   type="text" 
                   required 
                   placeholder="Addis Ababa"
+                  name="city"
+                  value={form.city}
+                  onChange={handleChange}
                 />
               </div>
               
@@ -145,6 +215,9 @@ const JobApplication = () => {
                   min="0"
                   max="50"
                   placeholder="5"
+                  name="experience"
+                  value={form.experience}
+                  onChange={handleChange}
                 />
               </div>
             </div>
@@ -165,6 +238,9 @@ const JobApplication = () => {
                 <Input 
                   type="text" 
                   placeholder="Senior Developer, Product Manager, etc."
+                  name="jobTitle"
+                  value={form.jobTitle}
+                  onChange={handleChange}
                 />
               </div>
               
@@ -175,6 +251,9 @@ const JobApplication = () => {
                 <Input 
                   type="text" 
                   placeholder="Your current employer"
+                  name="company"
+                  value={form.company}
+                  onChange={handleChange}
                 />
               </div>
               
@@ -185,6 +264,9 @@ const JobApplication = () => {
                 <Input 
                   type="url" 
                   placeholder="https://linkedin.com/in/yourprofile"
+                  name="linkedin"
+                  value={form.linkedin}
+                  onChange={handleChange}
                 />
               </div>
               
@@ -195,6 +277,9 @@ const JobApplication = () => {
                 <Input 
                   type="url" 
                   placeholder="https://yourportfolio.com"
+                  name="portfolio"
+                  value={form.portfolio}
+                  onChange={handleChange}
                 />
               </div>
               
@@ -206,6 +291,9 @@ const JobApplication = () => {
                   required
                   rows={4}
                   placeholder="List your key technical skills, programming languages, frameworks, etc."
+                  name="skills"
+                  value={form.skills}
+                  onChange={handleChange}
                 />
               </div>
             </div>
@@ -227,6 +315,9 @@ const JobApplication = () => {
                   required
                   rows={4}
                   placeholder="Tell us what attracts you to this role and our company..."
+                  name="interest"
+                  value={form.interest}
+                  onChange={handleChange}
                 />
               </div>
               
@@ -237,6 +328,9 @@ const JobApplication = () => {
                 <Textarea 
                   rows={4}
                   placeholder="Describe a project you've worked on or an achievement you're proud of..."
+                  name="project"
+                  value={form.project}
+                  onChange={handleChange}
                 />
               </div>
               
@@ -247,6 +341,9 @@ const JobApplication = () => {
                 <Input 
                   type="text" 
                   placeholder="e.g., 25,000 - 35,000"
+                  name="salary"
+                  value={form.salary}
+                  onChange={handleChange}
                 />
               </div>
               
@@ -256,6 +353,9 @@ const JobApplication = () => {
                 </label>
                 <Input 
                   type="date" 
+                  name="startDate"
+                  value={form.startDate}
+                  onChange={handleChange}
                 />
               </div>
             </div>
@@ -286,6 +386,7 @@ const JobApplication = () => {
                     accept=".pdf,.doc,.docx" 
                     className="hidden" 
                     id="resume"
+                    onChange={handleFileChange}
                   />
                   <label htmlFor="resume" className="cursor-pointer">
                     <Button type="button" variant="outline" className="mt-2">
@@ -312,6 +413,7 @@ const JobApplication = () => {
                     accept=".pdf,.doc,.docx" 
                     className="hidden" 
                     id="cover-letter"
+                    onChange={handleFileChange}
                   />
                   <label htmlFor="cover-letter" className="cursor-pointer">
                     <Button type="button" variant="outline" className="mt-2">
